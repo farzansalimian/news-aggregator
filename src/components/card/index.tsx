@@ -1,5 +1,6 @@
 import { cx } from '@/utils/cx'
-import imagePlaceholder from './placeholder.png'
+import { Image } from '@/components/image'
+
 interface CardProps {
   title: string
   description: string
@@ -26,8 +27,10 @@ export const Card = ({
           className,
         )}
       >
-        <img
-          src={imageUrl || imagePlaceholder}
+        <Image
+          height={160}
+          width="100%"
+          src={imageUrl || ''}
           alt={title}
           className="h-40 w-full rounded-t-lg object-cover transition duration-300 ease-in-out group-hover:scale-110"
         />

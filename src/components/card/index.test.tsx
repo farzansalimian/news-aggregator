@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react'
 import { Card } from './index'
-import imagePlaceholder from './placeholder.png'
 
 describe('Card', () => {
   const defaultProps = {
@@ -24,18 +23,6 @@ describe('Card', () => {
     render(<Card {...defaultProps} imageUrl={imageUrl} />)
     const image = screen.getByAltText('Test Title')
     expect(image).toHaveAttribute('src', imageUrl)
-  })
-
-  test('renders placeholder image when imageUrl is not provided', () => {
-    render(<Card {...defaultProps} />)
-    const image = screen.getByAltText('Test Title')
-    expect(image).toHaveAttribute('src', imagePlaceholder)
-  })
-
-  test('renders placeholder image when imageUrl is null', () => {
-    render(<Card {...defaultProps} imageUrl={null} />)
-    const image = screen.getByAltText('Test Title')
-    expect(image).toHaveAttribute('src', imagePlaceholder)
   })
 
   test('renders footer when provided', () => {
@@ -69,11 +56,5 @@ describe('Card', () => {
     const link = screen.getByRole('link')
     expect(link).toHaveAttribute('href', 'https://www.example.com')
     expect(link).toHaveAttribute('target', '_blank')
-  })
-
-  test('image has correct alt text', () => {
-    render(<Card {...defaultProps} />)
-    const image = screen.getByAltText('Test Title')
-    expect(image).toBeInTheDocument()
   })
 })
