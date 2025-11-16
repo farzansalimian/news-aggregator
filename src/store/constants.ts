@@ -1,4 +1,7 @@
 export const ReducersName = Object.freeze({
   FeedSetting: 'feedSetting',
-  News: 'news',
+  App: 'app',
+  GuardianApi: 'guardianApi',
+  NyTimesApi: 'nyTimesApi',
+  NewsApi: 'newsApi',
 })
