@@ -32,6 +32,22 @@ VITE_GUARDIAN_KEY=your_guardian_key
 VITE_NY_TIMES_KEY=your_ny_times_key
 ```
 
+### ⚠️ Security Warning
+
+**CRITICAL**: This application has serious security vulnerabilities related to API key management:
+
+1. **VITE_ Prefix Exposure**: All environment variables prefixed with `VITE_` are **bundled into the client-side JavaScript** and are **publicly accessible** in the browser. Anyone can view your API keys by inspecting the browser's developer tools or viewing the source code.
+
+2. **Not Production Ready**: This configuration is **absolutely not suitable for production**. API keys should never be exposed to the client-side code.
+
+3. **Bad Practice**: If a `.env.example` file exists with API keys, this is a security risk as it exposes the structure and potentially example keys in version control.
+
+**Recommended Solutions**:
+- Use a backend proxy server to make API calls server-side
+- Implement API key rotation and rate limiting on the backend
+- Use environment-specific API keys with restricted permissions
+- Never commit `.env` files or `.env.example` files with real API keys to version control
+
 ## Running with Docker
 
 ### Production Build
@@ -504,6 +520,12 @@ The application uses several custom hooks for reusable logic:
   - Network timeouts
   - Rate limiting scenarios
 
+### Security Vulnerabilities
+
+- **Exposed API Keys**: API keys are exposed in client-side code due to `VITE_` prefix, making them publicly accessible in the browser. This is a critical security vulnerability.
+- **Not Production Ready**: The current architecture exposes sensitive credentials and is absolutely not suitable for production environments.
+- **API Keys in Version Control**: If `.env.example` files contain API keys or key structures, they expose security-sensitive information in the repository.
+
 ## Bad Practices
 
 ### E2E Tests
@@ -516,6 +538,12 @@ The application uses several custom hooks for reusable logic:
 - **Unhandled Promise Rejections**: In `src/features/news-list/use-news/index.ts`, the `Promise.all()` call lacks proper error handling with `.catch()`, causing silent failures.
 - **No Error Boundaries**: Missing React error boundaries to catch and display runtime errors gracefully.
 - **No User Feedback**: No error UI components or toast notifications to inform users when something goes wrong.
+
+### Security
+
+- **Client-Side API Keys**: Using `VITE_` prefixed environment variables exposes API keys in the browser bundle. This is a critical security flaw.
+- **API Keys in .env.example**: If API keys or key structures are included in `.env.example` files, they expose sensitive information in version control.
+- **No Backend Proxy**: All API calls are made directly from the client, exposing API keys and making them vulnerable to abuse and theft.
 
 ## Improvements Needed
 
@@ -555,6 +583,31 @@ The application uses several custom hooks for reusable logic:
    - Reduce test execution time by optimizing wait strategies
    - Consider parallel test execution where possible
    - Add test timeouts that are appropriate for the operations being tested
+
+### Security
+
+1. **Implement Backend Proxy**
+   - Create a backend API server to proxy all news API requests
+   - Store API keys securely on the server-side only
+   - Implement rate limiting and request validation
+   - Add authentication/authorization if needed
+
+2. **Remove Client-Side API Keys**
+   - Remove all `VITE_` prefixed API key environment variables
+   - Never expose API keys in client-side code
+   - Use server-side environment variables (without `VITE_` prefix) for sensitive data
+
+3. **Secure Environment Variable Management**
+   - Remove any API keys from `.env.example` files
+   - Use placeholder values in `.env.example` (e.g., `VITE_API_BASE_URL=http://localhost:3000/api`)
+   - Add `.env` to `.gitignore` and ensure it's never committed
+   - Use secure secret management in production (e.g., AWS Secrets Manager, HashiCorp Vault)
+
+4. **API Key Security**
+   - Implement API key rotation policies
+   - Use API keys with minimal required permissions
+   - Monitor API key usage for anomalies
+   - Implement request signing or authentication tokens
 
 ### Code Quality
 

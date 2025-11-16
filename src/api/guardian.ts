@@ -23,6 +23,7 @@ export interface GuardianResponse {
       fields?: {
         thumbnail?: string
         body?: string
+        byline?: string
       }
     }>
   }
@@ -38,7 +39,7 @@ export const transformGuardianResponse = (
     url: article.webUrl || '',
     urlToImage: article.fields?.thumbnail || null,
     publishedAt: article.webPublicationDate || '',
-    author: null, // Guardian doesn't provide author in search results
+    author: article.fields?.byline || null,
     source: {
       id: 'guardian',
       name: 'The Guardian',
@@ -66,7 +67,7 @@ export const buildGuardianUrl = (params: GetArticlesParams): string => {
   url.searchParams.set('api-key', EnvVariables.GUARDIAN_KEY)
   url.searchParams.set('page', page.toString())
   url.searchParams.set('page-size', pageSize.toString())
-  url.searchParams.set('show-fields', 'thumbnail,body')
+  url.searchParams.set('show-fields', 'thumbnail,body,byline')
 
   if (searchQuery) {
     url.searchParams.set('q', encodeURIComponent(searchQuery))

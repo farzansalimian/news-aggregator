@@ -78,9 +78,10 @@ export const buildNewsApiUrl = (params: GetArticlesParams): string => {
     )
   }
 
-  if (categories) {
-    url.searchParams.set('category', encodeURIComponent(categories.join('|')))
-  }
+  url.searchParams.set(
+    'category',
+    encodeURIComponent(categories?.join('|') || 'general'),
+  )
   if (dateFrom) {
     url.searchParams.set('from', formatDate(dateFrom))
   }
