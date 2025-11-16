@@ -24,6 +24,11 @@ The application requires the following environment variables for API access:
 - `VITE_GUARDIAN_KEY` - API key for The Guardian API
 - `VITE_NY_TIMES_KEY` - API key for The New York Times API
 
+**⚠️ Important Note**: NewsAPI has a critical limitation: **"Requests from the browser are not allowed on the Developer plan, except from localhost."** This means:
+- The application will only work with NewsAPI when running on `localhost` (development)
+- Production deployments will fail when trying to fetch from NewsAPI directly from the browser
+- A backend proxy is required for NewsAPI in production environments
+
 Create a `.env` file in the root directory with your API keys:
 
 ```env
