@@ -1,75 +1,264 @@
-# React + TypeScript + Vite
+# News Aggregator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern news aggregation application built with React, TypeScript, and Vite that fetches news from multiple sources including News API, The Guardian, and The New York Times.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 📰 Aggregates news from multiple sources
+- 🔍 Advanced filtering and search capabilities
+- 📅 Date range picker for filtering news by date
+- 🎨 Modern UI with Tailwind CSS
+- ⚡ Fast development experience with Vite
+- 🧪 Comprehensive test coverage with Vitest and Playwright
 
-## React Compiler
+## Prerequisites
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+- Docker and Docker Compose installed on your system
+- (Optional) Node.js 20+ and pnpm for local development
 
-Note: This will impact Vite dev & build performances.
+## Environment Variables
 
-## Expanding the ESLint configuration
+The application requires the following environment variables for API access:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- `VITE_NEWS_API_KEY` - API key for News API
+- `VITE_GUARDIAN_KEY` - API key for The Guardian API
+- `VITE_NY_TIMES_KEY` - API key for The New York Times API
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Create a `.env` file in the root directory with your API keys:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```env
+VITE_NEWS_API_KEY=your_news_api_key
+VITE_GUARDIAN_KEY=your_guardian_key
+VITE_NY_TIMES_KEY=your_ny_times_key
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Running with Docker
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Production Build
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+To build and run the production version of the application:
+
+```bash
+# Build and start the container
+docker-compose up --build
+
+# Or run in detached mode
+docker-compose up -d --build
 ```
+
+The application will be available at `http://localhost:3000`
+
+To stop the container:
+
+```bash
+docker-compose down
+```
+
+### Development Mode
+
+To run the application in development mode with hot module replacement:
+
+```bash
+# Start the development server
+docker-compose --profile dev up dev --build
+
+# Or run in detached mode
+docker-compose --profile dev up -d dev --build
+```
+
+The development server will be available at `http://localhost:5173`
+
+### Using npm/pnpm Scripts (Recommended)
+
+For convenience, you can use npm/pnpm scripts to manage Docker containers:
+
+#### Production Commands
+
+```bash
+# Build the production image
+pnpm docker:build
+
+# Start the production container (detached)
+pnpm docker:up
+
+# View production logs
+pnpm docker:logs
+
+# Stop containers
+pnpm docker:down
+```
+
+#### Development Commands
+
+```bash
+# Start the development server (builds and starts)
+pnpm docker:dev
+```
+
+#### Testing Commands
+
+```bash
+# Run unit tests in Docker
+pnpm docker:test
+
+# Run E2E tests in Docker
+pnpm docker:test:e2e
+```
+
+### Using Docker Commands Directly
+
+#### Production Build
+
+```bash
+# Build the Docker image
+docker build -t news-aggregator:latest .
+
+# Run the container
+docker run -p 3000:80 \
+  -e VITE_NEWS_API_KEY=your_key \
+  -e VITE_GUARDIAN_KEY=your_key \
+  -e VITE_NY_TIMES_KEY=your_key \
+  news-aggregator:latest
+```
+
+#### Development Build
+
+```bash
+# Build the development Docker image
+docker build -f Dockerfile.dev -t news-aggregator:dev .
+
+# Run the development container
+docker run -p 5173:5173 \
+  -v $(pwd):/app \
+  -e VITE_NEWS_API_KEY=your_key \
+  -e VITE_GUARDIAN_KEY=your_key \
+  -e VITE_NY_TIMES_KEY=your_key \
+  news-aggregator:dev
+```
+
+## Local Development (Without Docker)
+
+If you prefer to run the application locally without Docker:
+
+1. Install dependencies:
+
+```bash
+pnpm install
+```
+
+2. Create a `.env` file with your API keys (see Environment Variables section)
+
+3. Start the development server:
+
+```bash
+pnpm dev
+```
+
+4. Build for production:
+
+```bash
+pnpm build
+```
+
+5. Preview the production build:
+
+```bash
+pnpm preview
+```
+
+## Testing
+
+### Local Testing (Without Docker)
+
+#### Unit Tests
+
+```bash
+pnpm test
+```
+
+#### End-to-End Tests
+
+```bash
+pnpm test:e2e
+```
+
+### Testing in Docker
+
+All tests can be run in Docker containers for consistent environments:
+
+#### Unit Tests in Docker
+
+```bash
+pnpm docker:test
+```
+
+#### E2E Tests in Docker
+
+```bash
+pnpm docker:test:e2e
+```
+
+The E2E tests will automatically start the development server and run tests against it. Test results and reports will be available in the `test-results` and `playwright-report` directories.
+
+## Project Structure
+
+```
+news-aggregator/
+├── src/
+│   ├── api/           # API integrations
+│   ├── app/           # App configuration
+│   ├── components/    # Reusable UI components
+│   ├── features/      # Feature modules
+│   ├── hooks/         # Custom React hooks
+│   ├── pages/         # Page components
+│   ├── store/         # Redux store configuration
+│   └── utils/         # Utility functions
+├── tests/             # E2E Test files
+├── public/            # Static assets
+├── Dockerfile         # Production Docker configuration
+├── Dockerfile.dev     # Development Docker configuration
+├── Dockerfile.test    # Test Docker configuration
+├── docker-compose.yml # Docker Compose configuration
+└── nginx.conf         # Nginx configuration for production
+```
+
+## Docker Image Details
+
+### Production Image
+
+- **Base Image**: `nginx:alpine` (lightweight production server)
+- **Build Stages**: Multi-stage build for optimized image size
+- **Port**: 80 (mapped to 3000 on host)
+- **Health Check**: Available at `/health` endpoint
+
+### Development Image
+
+- **Base Image**: `node:20-alpine`
+- **Port**: 5173 (Vite dev server)
+- **Volume Mounts**: Source code mounted for hot reloading
+
+### Test Image
+
+- **Base Image**: `node:20-alpine`
+- **Includes**: Playwright browsers (Chromium, Firefox, WebKit)
+- **Volume Mounts**: Source code and test results directories
+- **Used For**: Running unit tests and E2E tests in isolated environments
+
+## Troubleshooting
+
+### Container won't start
+
+- Ensure port 3000 (production) or 5173 (development) is not already in use
+- Check that environment variables are properly set
+- Verify Docker and Docker Compose are installed and running
+
+### API calls failing
+
+- Verify your API keys are correct in the `.env` file
+- Check that the environment variables are being passed to the container
+- Ensure your API keys have the necessary permissions
+
+### Build fails
+
+- Clear Docker cache: `docker system prune -a`
+- Rebuild without cache: `docker-compose build --no-cache`
