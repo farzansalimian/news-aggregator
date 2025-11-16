@@ -32,7 +32,11 @@ export const Card = ({
           className="h-40 w-full rounded-t-lg object-cover transition duration-300 ease-in-out group-hover:scale-110"
         />
         <div className="flex grow flex-col p-4">
-          <div className="line-clamp-1 text-sm text-gray-500">{topSlot}</div>
+          {topSlot && (
+            <div className="my-2 line-clamp-1 text-sm text-gray-500">
+              {topSlot}
+            </div>
+          )}
           <h3 className="text-lg font-bold">{title}</h3>
           <p className="line-clamp-3 text-sm text-gray-500">{description}</p>
           {footer && <div className="mt-auto pt-4">{footer}</div>}
