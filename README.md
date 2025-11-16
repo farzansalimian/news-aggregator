@@ -222,6 +222,222 @@ news-aggregator/
 └── nginx.conf         # Nginx configuration for production
 ```
 
+## Architecture
+
+### Overview
+
+The News Aggregator is built using a modern React architecture with Redux Toolkit for state management and RTK Query for API integration. The application follows a feature-based organization pattern with clear separation of concerns.
+
+### Technology Stack
+
+- **Frontend Framework**: React 18 with TypeScript
+- **State Management**: Redux Toolkit with Redux Persist
+- **API Layer**: RTK Query (Redux Toolkit Query)
+- **Routing**: React Router v6
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **Testing**: Vitest (unit tests) + Playwright (E2E tests)
+
+### Application Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    React Application                     │
+│  ┌───────────────────────────────────────────────────┐  │
+│  │              App Component (Root)                  │  │
+│  │  ┌──────────────────────────────────────────────┐ │  │
+│  │  │      Redux Provider + PersistGate            │ │  │
+│  │  │  ┌────────────────────────────────────────┐  │ │  │
+│  │  │  │      BrowserRouter                     │  │ │  │
+│  │  │  │  ┌──────────────────────────────────┐  │  │ │  │
+│  │  │  │  │      Layout Component            │  │  │ │  │
+│  │  │  │  │  ┌────────────────────────────┐  │  │ │  │ │
+│  │  │  │  │  │      Page Components       │  │  │ │  │ │
+│  │  │  │  │  │  ┌──────────────────────┐  │  │ │  │ │ │
+│  │  │  │  │  │  │   Feature Components │  │  │ │  │ │ │
+│  │  │  │  │  │  │   (NewsList, etc.)   │  │  │ │  │ │ │
+│  │  │  │  │  │  └──────────────────────┘  │  │ │  │ │ │
+│  │  │  │  │  └────────────────────────────┘  │  │ │  │ │
+│  │  │  │  └──────────────────────────────────┘  │  │ │  │
+│  │  │  └────────────────────────────────────────┘  │  │ │
+│  │  └──────────────────────────────────────────────┘  │  │
+│  └───────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────┘
+         │                    │                    │
+         ▼                    ▼                    ▼
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│  Redux Store │    │  RTK Query   │    │   External   │
+│              │    │   API Slice  │    │     APIs     │
+│  - App State │    │              │    │              │
+│  - Feed      │    │  - Guardian  │    │  - Guardian  │
+│  Settings    │    │  - NY Times  │    │  - NY Times  │
+│              │    │  - News API  │    │  - News API  │
+└──────────────┘    └──────────────┘    └──────────────┘
+```
+
+### State Management
+
+The application uses **Redux Toolkit** with the following structure:
+
+1. **Store Configuration** (`src/store/index.ts`)
+   - Combines multiple reducers using `combineReducers`
+   - Integrates RTK Query API slices as reducers
+   - Configures Redux Persist for state persistence (feed settings)
+   - Sets up middleware for RTK Query API caching
+
+2. **Redux Slices**:
+   - **App Slice**: Application-level state (e.g., mobile detection)
+   - **Feed Setting Slice**: User filter preferences (persisted to localStorage)
+   - **API Slices**: Three separate RTK Query slices for each news source
+
+3. **State Persistence**:
+   - Uses `redux-persist` to save feed settings to localStorage
+   - Only feed settings are persisted (whitelisted)
+   - App state and API cache are not persisted
+
+### API Integration Pattern
+
+The application integrates with three news APIs using **RTK Query**:
+
+1. **API Structure** (`src/api/`):
+   - Each API has its own file: `guardian.ts`, `ny-times.ts`, `news-api.ts`
+   - Each API slice uses `createApi` from RTK Query
+   - Custom `queryFn` implementations handle URL building and response transformation
+
+2. **Data Flow**:
+   ```
+   Component → useLazyQuery Hook → RTK Query → API Call → Transform Response → Update Cache → Component Re-render
+   ```
+
+3. **Response Transformation**:
+   - Each API has a unique response format
+   - Transformation functions normalize responses to a common `Article` type
+   - Transformed data is stored in RTK Query cache
+
+4. **API Features**:
+   - Automatic caching and deduplication
+   - Lazy query hooks for on-demand fetching
+   - Base query configuration for error handling
+   - Type-safe API responses
+
+### Component Architecture
+
+The application follows a **feature-based component organization**:
+
+1. **Pages** (`src/pages/`):
+   - Top-level route components
+   - Minimal logic, mainly composition
+   - Examples: `HomePage`, `FeedPage`, `NotFoundPage`
+
+2. **Features** (`src/features/`):
+   - Self-contained feature modules
+   - Include components, hooks, and related logic
+   - Examples: `news-list/`, `sidebar-portal/`, `navbar-lef-slot-portal/`
+   - Each feature can have:
+     - Main component
+     - Custom hooks (e.g., `use-news/`)
+     - Sub-components
+     - Constants and utilities
+
+3. **Components** (`src/components/`):
+   - Reusable, generic UI components
+   - No business logic dependencies
+   - Examples: `Button`, `Card`, `Input`, `Modal`, `Grid`
+   - Each component has its own directory with tests
+
+4. **Layout** (`src/app/layout/`):
+   - Application shell component
+   - Handles responsive layout
+   - Provides portals for feature injection (sidebar, navbar)
+
+### Data Flow
+
+1. **User Interaction**:
+   - User interacts with filters or scrolls to load more
+   - Component calls `useNews` hook or directly uses RTK Query hooks
+
+2. **State Update**:
+   - Filter changes update local state in `useNews` hook
+   - Debounced filters trigger API calls
+   - RTK Query manages API state (loading, error, data)
+
+3. **API Calls**:
+   - Multiple API calls made in parallel using `Promise.all`
+   - Each API call is independent and can succeed/fail separately
+   - Responses are transformed and cached by RTK Query
+
+4. **UI Update**:
+   - Components re-render based on state changes
+   - Loading states shown during API calls
+   - Articles displayed in a grid layout
+   - Infinite scroll triggers additional page loads
+
+### Routing
+
+The application uses **React Router v6** with a simple routing structure:
+
+- `/` - Home page (main news feed)
+- `/feed` - Feed page (alternative view)
+- `*` - 404 page for unmatched routes
+
+Routes are defined in `src/app/index.tsx` with a shared `Layout` component wrapping all pages.
+
+### Custom Hooks
+
+The application uses several custom hooks for reusable logic:
+
+- **`useNews`**: Main hook for news fetching and filtering logic
+  - Manages filter state with debouncing
+  - Coordinates multiple API calls
+  - Handles pagination and infinite scroll
+  - Combines articles from multiple sources
+
+- **`useDebounce`**: Debounces filter changes to reduce API calls
+- **`useMount`**: Handles component mount lifecycle
+- **`useRouterMatch`**: Router utility hook
+
+### Key Design Decisions
+
+1. **RTK Query over Fetch**: Provides caching, deduplication, and automatic state management
+2. **Lazy Queries**: API calls are made on-demand rather than automatically on mount
+3. **Feature-based Organization**: Keeps related code together for better maintainability
+4. **Portal Pattern**: Allows features to inject UI into layout slots (sidebar, navbar)
+5. **Component Composition**: Small, focused components that compose into larger features
+6. **TypeScript First**: Strong typing throughout for better developer experience and fewer bugs
+
+### State Management Flow
+
+```
+┌─────────────┐
+│   User      │
+│  Action     │
+└──────┬──────┘
+       │
+       ▼
+┌─────────────────┐
+│  Component      │
+│  (useNews hook) │
+└──────┬──────────┘
+       │
+       ▼
+┌─────────────────┐      ┌──────────────┐
+│  RTK Query      │─────▶│  API Call    │
+│  (Lazy Query)   │      │  (Guardian,  │
+└──────┬──────────┘      │   NY Times,  │
+       │                 │   News API)  │
+       ▼                 └──────────────┘
+┌─────────────────┐              │
+│  Redux Store    │◀─────────────┘
+│  (Cache Update) │
+└──────┬──────────┘
+       │
+       ▼
+┌─────────────────┐
+│  Component      │
+│  Re-render      │
+└─────────────────┘
+```
+
 ## Docker Image Details
 
 ### Production Image
@@ -262,3 +478,99 @@ news-aggregator/
 
 - Clear Docker cache: `docker system prune -a`
 - Rebuild without cache: `docker-compose build --no-cache`
+
+## Known Issues
+
+### API Error Handling
+
+- **Silent Failures**: API errors are not properly handled or displayed to users. When API calls fail, the application fails silently without showing error messages or fallback UI.
+- **No Error Recovery**: There's no retry mechanism for failed API requests.
+- **Partial Failures**: If one API source fails while others succeed, the error is not communicated to the user.
+
+### E2E Test Performance
+
+- **Slow Execution**: E2E tests are slow and prone to timeouts, especially in CI/CD environments.
+- **Timeout Issues**: Tests frequently timeout due to hardcoded wait times and inefficient waiting strategies.
+- **Flaky Tests**: Tests may fail intermittently due to race conditions and timing issues.
+
+### Test Coverage Gaps
+
+- **Missing Error Cases**: Unit tests do not cover API error scenarios, network failures, or malformed responses.
+- **Edge Cases**: Tests don't cover edge cases such as:
+  - Very long search queries
+  - Invalid date ranges
+  - Empty API responses
+  - Partial API failures (one source fails, others succeed)
+  - Network timeouts
+  - Rate limiting scenarios
+
+## Bad Practices
+
+### E2E Tests
+
+- **Hardcoded Timeouts**: Multiple uses of `waitForTimeout()` instead of waiting for actual conditions (found in `tests/e2e/index.spec.ts`). This makes tests slow, flaky, and unreliable.
+- **No Proper Error Assertions**: The error handling test doesn't verify that errors are actually displayed to users.
+
+### Code Quality
+
+- **Unhandled Promise Rejections**: In `src/features/news-list/use-news/index.ts`, the `Promise.all()` call lacks proper error handling with `.catch()`, causing silent failures.
+- **No Error Boundaries**: Missing React error boundaries to catch and display runtime errors gracefully.
+- **No User Feedback**: No error UI components or toast notifications to inform users when something goes wrong.
+
+## Improvements Needed
+
+### Error Handling
+
+1. **Implement Comprehensive Error Handling**
+   - Add `.catch()` handlers to all API promise chains
+   - Create error UI components to display errors to users
+   - Implement error boundaries for React error handling
+   - Add toast notifications or error banners for user feedback
+
+2. **API Error Recovery**
+   - Implement retry logic with exponential backoff for failed API requests
+   - Add fallback mechanisms when APIs are unavailable
+   - Handle partial failures gracefully (show data from successful sources, errors for failed ones)
+
+3. **Error Logging**
+   - Integrate error tracking service (e.g., Sentry, LogRocket)
+   - Log API errors with context for debugging
+   - Track error rates and patterns
+
+### Testing
+
+1. **Improve E2E Test Quality**
+   - Replace all `waitForTimeout()` calls with proper wait conditions (e.g., `waitFor()`, `waitForSelector()`)
+   - Use Playwright's built-in waiting mechanisms
+   - Add proper error state assertions
+   - Optimize test execution time
+
+2. **Expand Test Coverage**
+   - Add unit tests for error scenarios (API failures, network errors, malformed responses)
+   - Test edge cases (empty responses, partial failures, rate limiting)
+   - Add integration tests for error handling flows
+   - Test error UI components
+
+3. **Test Performance**
+   - Reduce test execution time by optimizing wait strategies
+   - Consider parallel test execution where possible
+   - Add test timeouts that are appropriate for the operations being tested
+
+### Code Quality
+
+1. **Type Safety**
+   - Add stricter TypeScript configurations
+   - Ensure all API responses are properly typed
+   - Add runtime validation for API responses
+
+2. **User Experience**
+   - Add loading states for better user feedback
+   - Implement skeleton loaders during data fetching
+   - Add empty states when no articles are found
+   - Improve error messages to be user-friendly
+
+3. **Performance**
+   - Implement request debouncing more effectively
+   - Add request cancellation for stale requests
+   - Optimize re-renders with proper memoization
+   - Consider implementing virtual scrolling for large article lists
