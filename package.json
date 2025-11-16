@@ -9,7 +9,14 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "coverage": "vitest run --coverage",
+    "docker:build": "docker compose build app",
+    "docker:up": "docker compose up -d app",
+    "docker:down": "docker compose down",
+    "docker:dev": "docker compose --profile dev up --build dev",
+    "docker:test": "docker compose --profile test run --rm test",
+    "docker:test:e2e": "docker compose --profile test up dev-server --build -d && docker compose --profile test run --rm test-e2e"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.10.1",
@@ -37,6 +44,7 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^5.1.0",
+    "@vitest/coverage-v8": "^4.0.9",
     "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",

@@ -37,8 +37,6 @@ export const handlers = [
       const page = parseInt(url.searchParams.get('page') || '0')
 
       const mockResponse: NYTimesResponse = {
-        status: 'OK',
-        copyright: 'Copyright',
         response: {
           docs: Array.from({ length: 10 }, (_, i) => ({
             _id: `nytimes-${page}-${i}`,
@@ -51,18 +49,22 @@ export const handlers = [
             byline: {
               original: `By Author ${i}`,
             },
-            multimedia: [
-              {
-                url: `https://example.com/image-${i}.jpg`,
-                type: 'image',
-                subtype: 'thumbnail',
+            lead_paragraph: `Lead paragraph content ${i}`,
+            multimedia: {
+              default: {
+                url: `https://static01.nyt.com/images/image-${i}.jpg`,
+                height: 400,
+                width: 600,
               },
-            ],
+              thumbnail: {
+                url: `https://static01.nyt.com/images/image-${i}-thumb.jpg`,
+                height: 75,
+                width: 75,
+              },
+            },
           })),
           meta: {
             hits: 100,
-            offset: page * 10,
-            time: 1,
           },
         },
       }
@@ -72,7 +74,7 @@ export const handlers = [
   ),
 
   // Mock News API
-  http.get('https://newsapi.org/v2/everything', ({ request }) => {
+  http.get('https://newsapi.org/v2/top-headlines', ({ request }) => {
     const url = new URL(request.url)
     const page = parseInt(url.searchParams.get('page') || '1')
 

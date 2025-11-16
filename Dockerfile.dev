@@ -1,0 +1,17 @@
+FROM node:20-alpine
+
+# Install wget for health checks
+RUN apk add --no-cache wget
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml ./
+
+RUN pnpm install
+
+EXPOSE 3000
+
+CMD ["pnpm", "dev", "--", "--port", "3000", "--host"]
+
