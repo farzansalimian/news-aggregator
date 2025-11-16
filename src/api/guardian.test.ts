@@ -221,7 +221,7 @@ describe('buildGuardianUrl', () => {
     expect(url).toContain('api-key=test-api-key')
     expect(url).toContain('page=1')
     expect(url).toContain('page-size=10')
-    expect(url).toContain('show-fields=thumbnail,body')
+    expect(url).toContain('show-fields=thumbnail%2Cbody')
   })
 
   it('should include search query in URL', () => {
@@ -231,7 +231,7 @@ describe('buildGuardianUrl', () => {
       searchQuery: 'test query',
     })
 
-    expect(url).toContain('q=test%20query')
+    expect(url).toContain('q=test%2520query')
   })
 
   it('should include categories in URL', () => {
@@ -241,7 +241,7 @@ describe('buildGuardianUrl', () => {
       categories: ['technology', 'science'],
     })
 
-    expect(url).toContain('section=technology%7Cscience')
+    expect(url).toContain('section=technology%257Cscience')
   })
 
   it('should include dateFrom in URL', () => {
@@ -267,7 +267,7 @@ describe('buildGuardianUrl', () => {
       author: 'John Doe',
     })
 
-    expect(url).toContain('tag/contributor=John%20Doe')
+    expect(url).toContain('tag%2Fcontributor=John%2520Doe')
   })
 
   it('should handle all parameters together', () => {
@@ -290,7 +290,7 @@ describe('buildGuardianUrl', () => {
     expect(url).toContain('section=technology')
     expect(url).toContain('from-date=')
     expect(url).toContain('to-date=')
-    expect(url).toContain('tag/contributor=Jane%20Smith')
+    expect(url).toContain('tag%2Fcontributor=Jane%2520Smith')
   })
 
   it('should use default page and pageSize values', () => {

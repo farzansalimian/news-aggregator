@@ -61,34 +61,34 @@ export const buildNewsApiUrl = (params: GetArticlesParams): string => {
     dateTo,
     searchQuery,
   } = params
-  const baseUrl = 'https://newsapi.org/v2'
-  const apiKey = EnvVariables.NEWS_API_KEY
 
-  let url = `${baseUrl}/everything?apiKey=${apiKey}&page=${page}&pageSize=${pageSize}`
+  const url = new URL(`https://newsapi.org/v2/top-headlines`)
+  url.searchParams.set('apiKey', EnvVariables.NEWS_API_KEY)
+  url.searchParams.set('page', page.toString())
+  url.searchParams.set('pageSize', pageSize.toString())
 
-  if (searchQuery) {
-    url += `&q=${encodeURIComponent(searchQuery)}`
+  if (searchQuery || author) {
+    url.searchParams.set(
+      'q',
+      encodeURIComponent(
+        searchQuery && author
+          ? `${searchQuery} ${author}`
+          : searchQuery || author || '',
+      ),
+    )
   }
-
-  url += `&sources=abc-news`
 
   if (categories) {
-    url += `&q=${encodeURIComponent(categories.join('|'))}`
+    url.searchParams.set('category', encodeURIComponent(categories.join('|')))
   }
-
-  if (author) {
-    url += `&q=${encodeURIComponent(author)}`
-  }
-
   if (dateFrom) {
-    url += `&from=${formatDate(dateFrom)}`
+    url.searchParams.set('from', formatDate(dateFrom))
   }
-
   if (dateTo) {
-    url += `&to=${formatDate(dateTo)}`
+    url.searchParams.set('to', formatDate(dateTo))
   }
 
-  return url
+  return url.toString()
 }
 export const newsApi = createApi({
   reducerPath: ReducersName.NewsApi,

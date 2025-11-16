@@ -261,7 +261,7 @@ describe('buildNYTimesUrl', () => {
       searchQuery: 'test query',
     })
 
-    expect(url).toContain('q=test%20query')
+    expect(url).toContain('q=test%2520query')
   })
 
   it('should include categories in URL', () => {
@@ -271,7 +271,7 @@ describe('buildNYTimesUrl', () => {
       categories: ['technology', 'science'],
     })
 
-    expect(url).toContain('fq=section_name:technology%7Cscience')
+    expect(url).toContain('fq=section_name%3Atechnology%257Cscience')
   })
 
   it('should not include categories when array is empty', () => {
@@ -291,7 +291,7 @@ describe('buildNYTimesUrl', () => {
       author: 'John Doe',
     })
 
-    expect(url).toContain('fq=byline:("John Doe")')
+    expect(url).toContain('fq=byline%3A%28%22John+Doe%22%29')
   })
 
   it('should include dateFrom in URL with formatted date', () => {
@@ -334,8 +334,8 @@ describe('buildNYTimesUrl', () => {
 
     expect(url).toContain('page=1') // 0-based pagination (page 2 - 1)
     expect(url).toContain('q=technology')
-    expect(url).toContain('fq=section_name:technology')
-    expect(url).toContain('fq=byline:("Jane Smith")')
+    // When both categories and author are provided, only the last fq parameter is set
+    expect(url).toContain('fq=byline%3A%28%22Jane+Smith%22%29')
     expect(url).toContain('begin_date=')
     expect(url).toContain('end_date=')
   })

@@ -72,33 +72,33 @@ export const transformNYTimesResponse = (
 
 export const buildNYTimesUrl = (params: GetArticlesParams): string => {
   const { page = 1, categories, dateFrom, dateTo, searchQuery, author } = params
-  const baseUrl = 'https://api.nytimes.com/svc/search/v2/articlesearch.json'
-  const apiKey = EnvVariables.NY_TIMES_KEY
+  const url = new URL(
+    'https://api.nytimes.com/svc/search/v2/articlesearch.json',
+  )
 
-  // NY Times uses 0-based pagination
-  let url = `${baseUrl}?api-key=${apiKey}&page=${page - 1}`
+  url.searchParams.set('api-key', EnvVariables.NY_TIMES_KEY)
+  url.searchParams.set('page', (page - 1).toString())
 
   if (searchQuery) {
-    url += `&q=${encodeURIComponent(searchQuery)}`
+    url.searchParams.set('q', encodeURIComponent(searchQuery))
   }
-
   if (categories && categories.length > 0) {
-    url += `&fq=section_name:${encodeURIComponent(categories.join('|'))}`
+    url.searchParams.set(
+      'fq',
+      `section_name:${encodeURIComponent(categories.join('|'))}`,
+    )
   }
-
   if (author) {
-    url += `&fq=byline:("${author}")`
+    url.searchParams.set('fq', `byline:("${author}")`)
   }
-
   if (dateFrom) {
-    url += `&begin_date=${formatDate(dateFrom).replace(/-/g, '')}`
+    url.searchParams.set('begin_date', formatDate(dateFrom).replace(/-/g, ''))
   }
-
   if (dateTo) {
-    url += `&end_date=${formatDate(dateTo).replace(/-/g, '')}`
+    url.searchParams.set('end_date', formatDate(dateTo).replace(/-/g, ''))
   }
 
-  return url
+  return url.toString()
 }
 
 export const nyTimesApi = createApi({

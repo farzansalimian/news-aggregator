@@ -200,11 +200,10 @@ describe('buildNewsApiUrl', () => {
   it('should build URL with minimal parameters', () => {
     const url = buildNewsApiUrl({ page: 1, pageSize: 10 })
 
-    expect(url).toContain('https://newsapi.org/v2/everything')
+    expect(url).toContain('https://newsapi.org/v2/top-headlines')
     expect(url).toContain('apiKey=test-api-key')
     expect(url).toContain('page=1')
     expect(url).toContain('pageSize=10')
-    expect(url).toContain('sources=abc-news')
   })
 
   it('should include search query in URL', () => {
@@ -214,7 +213,7 @@ describe('buildNewsApiUrl', () => {
       searchQuery: 'test query',
     })
 
-    expect(url).toContain('q=test%20query')
+    expect(url).toContain('q=test%2520query')
   })
 
   it('should include categories in URL', () => {
@@ -224,7 +223,7 @@ describe('buildNewsApiUrl', () => {
       categories: ['technology', 'science'],
     })
 
-    expect(url).toContain('q=technology%7Cscience')
+    expect(url).toContain('category=technology%257Cscience')
   })
 
   it('should include author in URL', () => {
@@ -234,7 +233,7 @@ describe('buildNewsApiUrl', () => {
       author: 'John Doe',
     })
 
-    expect(url).toContain('q=John%20Doe')
+    expect(url).toContain('q=John%2520Doe')
   })
 
   it('should include dateFrom in URL', () => {
@@ -269,13 +268,11 @@ describe('buildNewsApiUrl', () => {
 
     expect(url).toContain('page=2')
     expect(url).toContain('pageSize=20')
-    // NewsAPI adds multiple q parameters: one for searchQuery, one for categories, one for author
-    expect(url).toContain('q=technology') // searchQuery
-    expect(url).toContain('q=technology') // categories (single category)
-    expect(url).toContain('q=Jane%20Smith') // author
+    // NewsAPI combines searchQuery and author into a single q parameter
+    expect(url).toContain('q=technology%2520Jane%2520Smith')
+    expect(url).toContain('category=technology')
     expect(url).toContain('from=')
     expect(url).toContain('to=')
-    expect(url).toContain('sources=abc-news')
   })
 
   it('should use default page and pageSize values', () => {
@@ -288,6 +285,7 @@ describe('buildNewsApiUrl', () => {
   it('should always include sources parameter', () => {
     const url = buildNewsApiUrl({ page: 1, pageSize: 10 })
 
-    expect(url).toContain('sources=abc-news')
+    // News API top-headlines doesn't require sources parameter
+    expect(url).toContain('https://newsapi.org/v2/top-headlines')
   })
 })

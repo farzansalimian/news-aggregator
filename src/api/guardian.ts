@@ -61,32 +61,30 @@ export const buildGuardianUrl = (params: GetArticlesParams): string => {
     searchQuery,
     author,
   } = params
-  const baseUrl = 'https://content.guardianapis.com/search'
-  const apiKey = EnvVariables.GUARDIAN_KEY
 
-  let url = `${baseUrl}?api-key=${apiKey}&page=${page}&page-size=${pageSize}&show-fields=thumbnail,body`
+  const url = new URL(`https://content.guardianapis.com/search`)
+  url.searchParams.set('api-key', EnvVariables.GUARDIAN_KEY)
+  url.searchParams.set('page', page.toString())
+  url.searchParams.set('page-size', pageSize.toString())
+  url.searchParams.set('show-fields', 'thumbnail,body')
 
   if (searchQuery) {
-    url += `&q=${encodeURIComponent(searchQuery)}`
+    url.searchParams.set('q', encodeURIComponent(searchQuery))
   }
-
   if (categories) {
-    url += `&section=${encodeURIComponent(categories.join('|'))}`
+    url.searchParams.set('section', encodeURIComponent(categories.join('|')))
   }
-
   if (dateFrom) {
-    url += `&from-date=${formatDate(dateFrom)}`
+    url.searchParams.set('from-date', formatDate(dateFrom))
   }
-
   if (dateTo) {
-    url += `&to-date=${formatDate(dateTo)}`
+    url.searchParams.set('to-date', formatDate(dateTo))
   }
-
   if (author) {
-    url += `&tag/contributor=${encodeURIComponent(author)}`
+    url.searchParams.set('tag/contributor', encodeURIComponent(author))
   }
 
-  return url
+  return url.toString()
 }
 
 export const guardianApi = createApi({
